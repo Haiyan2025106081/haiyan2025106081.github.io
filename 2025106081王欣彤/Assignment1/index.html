@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名著讲解视频自动生成技能 | 2025106081 王欣彤</title>
+<!-- 外部样式表（保留，仍可用）；本页视觉升级版样式以内联 style 为准 -->
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* ============================================================
+     现代杂志拼贴风格 · 视觉升级版
+     说明：本 <style> 位于 <link> 之后，同名选择器优先级更靠后，
+          因此页面最终生效的是本段规则（原 style.css 作为兼容保留）。
+     ============================================================ */
+
+  :root{
+    --primary:#1A365D;
+    --accent:#3182CE;
+    --accent-dark:#2C6DB0;
+    --bg:#F8FAFC;
+    --line:#E2E8F0;
+    --text:#1E293B;
+    --muted:#64748B;
+    --radius:6px;
+
+    /* --- 拼贴风新增令牌 --- */
+    --paper:#F2EFE8;          /* 米白纸底 */
+    --paper-2:#EAE6DD;        /* 深一档的纸色 */
+    --ink:#1C1C1E;            /* 高级灰近黑 */
+    --gray-1:#6B6B70;
+    --gray-2:#9A9A9F;
+    --klein:#002FA7;          /* 克莱因蓝 */
+    --klein-dark:#001E6B;
+    --orange:#FF6B2C;         /* 活力橙 */
+    --orange-dark:#E4551A;
+    --green:#2F9E5F;
+    --hard:#1C1C1E;           /* 粗黑边框色 */
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:smooth;      /* 锚点平滑滚动 */
+    scroll-padding-top:96px;     /* 吸顶导航补偿 */
+  }
+
+  body{
+    font-family:"Microsoft YaHei","微软雅黑","PingFang SC","Hiragino Sans GB",sans-serif;
+    color:var(--text);
+    font-size:15px;
+    line-height:1.8;
+    padding:0 24px 64px;
+    background-color:var(--paper);
+    /* 米白底 + 渐变晕染 + 双层噪点纹理，纯 CSS / 内联 SVG，不依赖外部资源 */
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.42'/></svg>"),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.014' numOctaves='2'/><feColorMatrix type='saturate' values='0'/></filter><rect width='420' height='420' filter='url(%23m)' opacity='0.5'/></svg>"),
+      radial-gradient(circle at 8% 4%, rgba(0,47,167,.07), transparent 42%),
+      radial-gradient(circle at 94% 26%, rgba(255,107,44,.08), transparent 38%),
+      linear-gradient(180deg,#F6F3EC 0%,#F2EFE8 38%,#EDE9E1 100%);
+    background-size:160px 160px, 420px 420px, auto, auto, auto;
+    background-attachment:fixed, fixed, fixed, fixed, fixed;
+    background-blend-mode:multiply, soft-light, normal, normal, normal;
+  }
+
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+  }
+
+  /* ================= 顶部吸顶导航 ================= */
+  .nav{
+    position:sticky;
+    top:0;
+    z-index:99;
+    margin:0 -24px;
+    padding:0 24px;
+    background:rgba(242,239,232,.86);
+    -webkit-backdrop-filter:saturate(150%) blur(10px);
+    backdrop-filter:saturate(150%) blur(10px);
+    border-bottom:3px solid var(--hard);
+  }
+
+  .nav-inner{
+    max-width:1080px;
+    margin:0 auto;
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+  }
+
+  .nav-brand{
+    font-size:17px;
+    font-weight:900;
+    color:var(--ink);
+    letter-spacing:2px;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+
+  .nav-brand .dot{
+    width:11px;
+    height:11px;
+    background:var(--orange);
+    border:2px solid var(--hard);
+    border-radius:50%;
+    display:inline-block;
+  }
+
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:nowrap;
+  }
+
+  .nav-links a{
+    position:relative;
+    display:inline-block;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--gray-1);
+    text-decoration:none;
+    padding:7px 12px;
+    border-radius:3px;
+    white-space:nowrap;
+    transition:color .18s ease, background .18s ease;
+  }
+
+  .nav-links a:hover{
+    color:var(--klein);
+    background:rgba(0,47,167,.07);
+  }
+
+  /* 克制的悬停下划线 */
+  .nav-links a::after{
+    content:"";
+    position:absolute;
+    left:12px;
+    right:12px;
+    bottom:3px;
+    height:2px;
+    background:var(--orange);
+    transform:scaleX(0);
+    transform-origin:left center;
+    transition:transform .22s ease;
+  }
+
+  .nav-links a:hover::after{transform:scaleX(1);}
+
+  /* ================= 通用区块卡片（复古粗边框 + 粗阴影） ================= */
+  .card{
+    position:relative;
+    background:#FFFDF8;
+    border:3px solid var(--hard);
+    border-radius:3px;
+    padding:32px 34px 34px;
+    margin-bottom:34px;
+    box-shadow:8px 8px 0 rgba(28,28,30,.14);
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+
+  .card:hover{
+    transform:scale(1.012) rotate(0deg);
+    box-shadow:11px 12px 0 rgba(28,28,30,.18);
+  }
+
+  /* 拼贴：部分区块轻微旋转 2-3 度 */
+  .tilt-l{transform:rotate(-1.6deg);}
+  .tilt-r{transform:rotate(1.6deg);}
+  .tilt-l:hover{transform:scale(1.012) rotate(-1.6deg);}
+  .tilt-r:hover{transform:scale(1.012) rotate(1.6deg);}
+
+  /* 区块序号贴纸 */
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding-bottom:14px;
+    margin-bottom:22px;
+    border-bottom:3px solid var(--hard);
+  }
+
+  .num{
+    flex:0 0 auto;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:var(--klein);
+    color:#FFFFFF;
+    font-size:14px;
+    font-weight:900;
+    line-height:30px;
+    text-align:center;
+    font-family:Georgia,"Times New Roman",serif;
+    border:2px solid var(--hard);
+  }
+
+  .card-head h2{
+    font-size:23px;
+    font-weight:900;
+    color:var(--ink);
+    letter-spacing:.5px;
+    line-height:1.35;
+  }
+
+  /* 细无衬线小字标签，与小标题形成对比 */
+  .kicker{
+    display:block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:3.2px;
+    color:var(--gray-2);
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+
+  p{
+    color:#33333A;
+    text-align:justify;
+  }
+
+  p + p{margin-top:12px;}
+
+  /* ================= 1. 封面 ================= */
+  .cover{
+    position:relative;
+    background:#FFFDF8;
+    border:3px solid var(--hard);
+    border-radius:3px;
+    padding:60px 46px 52px;
+    margin:34px 0 38px;
+    overflow:hidden;
+    box-shadow:10px 10px 0 rgba(28,28,30,.16);
+  }
+
+  /* 克莱因蓝色块：拼贴色带 */
+  .cover::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:12px;
+    height:100%;
+    background:var(--klein);
+    border-right:3px solid var(--hard);
+  }
+
+  /* 活力橙装饰斜块 */
+  .cover::after{
+    content:"";
+    position:absolute;
+    right:-70px;
+    top:-70px;
+    width:230px;
+    height:230px;
+    background:var(--orange);
+    border:3px solid var(--hard);
+    transform:rotate(18deg);
+    opacity:.9;
+  }
+
+  .cover > *{position:relative;z-index:2;}
+
+  .cover .eyebrow{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:3.5px;
+    color:var(--klein);
+    border:2px solid var(--hard);
+    background:#FFFDF8;
+    border-radius:2px;
+    padding:4px 11px;
+    margin-bottom:24px;
+  }
+
+  /* 超大标题 */
+  .cover h1{
+    font-size:58px;
+    line-height:1.12;
+    font-weight:900;
+    color:var(--ink);
+    letter-spacing:-1.5px;
+    max-width:820px;
+  }
+
+  .cover .rule{
+    width:96px;
+    height:9px;
+    background:var(--orange);
+    border:2px solid var(--hard);
+    margin:26px 0 22px;
+  }
+
+  .cover .sub{
+    font-size:17px;
+    color:#43434A;
+    line-height:1.85;
+    max-width:660px;
+    font-weight:400;
+  }
+
+  .cover .meta{
+    margin-top:36px;
+    padding-top:20px;
+    border-top:2px dashed #B9B5AC;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 20px;
+    font-size:13.5px;
+    color:#43434A;
+    letter-spacing:.5px;
+  }
+
+  .cover .meta span{
+    display:inline-block;
+    background:var(--paper-2);
+    border:2px solid var(--hard);
+    border-radius:2px;
+    padding:5px 14px;
+  }
+
+  .cover .meta span b{
+    font-weight:900;
+    color:var(--klein);
+  }
+
+  /* ================= 2. 选题：大引号装饰 + 块状 ================= */
+  .lead-quote{
+    position:relative;
+    padding-left:78px;
+    min-height:52px;
+  }
+
+  .lead-quote::before{
+    content:"\201C";
+    position:absolute;
+    left:0;
+    top:-14px;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:104px;
+    line-height:1;
+    color:var(--orange);
+    text-shadow:3px 3px 0 rgba(28,28,30,.16);
+  }
+
+  .lead-quote p{
+    font-size:15.5px;
+    line-height:1.95;
+  }
+
+  /* 块状拆分：左侧色条 + 小标题 */
+  .blocks{
+    display:grid;
+    gap:14px;
+  }
+
+  .block{
+    position:relative;
+    background:var(--paper);
+    border:2px solid var(--hard);
+    border-left:8px solid var(--klein);
+    border-radius:2px;
+    padding:16px 20px;
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+
+  .block:hover{
+    transform:scale(1.02);
+    box-shadow:5px 6px 0 rgba(28,28,30,.14);
+    background:#FFFDF8;
+  }
+
+  .block .b-title{
+    display:block;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:2.2px;
+    color:var(--klein);
+    margin-bottom:5px;
+  }
+
+  .block .b-text{
+    font-size:14px;
+    line-height:1.85;
+    color:#33333A;
+    margin:0;
+  }
+
+  .block.accent-o{border-left-color:var(--orange);}
+  .block.accent-o .b-title{color:var(--orange-dark);}
+  .block.accent-g{border-left-color:var(--green);}
+  .block.accent-g .b-title{color:var(--green);}
+  .block.accent-k{border-left-color:var(--hard);}
+  .block.accent-k .b-title{color:var(--ink);}
+
+  /* ================= 3. s0-s6 栅格（错落拼贴） ================= */
+  .grid-s{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-top:8px;
+    padding:6px 0;
+  }
+
+  .s-item{
+    position:relative;
+    background:#FFFDF8;
+    border:2.5px solid var(--hard);
+    border-top:7px solid var(--klein);
+    border-radius:2px;
+    padding:16px 15px 18px;
+    box-shadow:4px 4px 0 rgba(28,28,30,.13);
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+
+  /* 错落：交替轻微旋转 */
+  .s-item:nth-child(odd){transform:rotate(-1.4deg);}
+  .s-item:nth-child(even){transform:rotate(1.4deg);}
+
+  .s-item:hover{
+    transform:scale(1.02) rotate(0deg);
+    box-shadow:6px 7px 0 rgba(28,28,30,.18);
+  }
+
+  .s-item:nth-child(2){border-top-color:var(--orange);}
+  .s-item:nth-child(3){border-top-color:var(--green);}
+  .s-item:nth-child(4){border-top-color:var(--hard);}
+
+  .s-item .tag{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:17px;
+    font-weight:900;
+    color:var(--klein);
+    letter-spacing:.5px;
+    display:block;
+    margin-bottom:7px;
+  }
+
+  .s-item:nth-child(2) .tag{color:var(--orange-dark);}
+  .s-item:nth-child(3) .tag{color:var(--green);}
+  .s-item:nth-child(4) .tag{color:var(--ink);}
+
+  .s-item .role{
+    font-size:13px;
+    font-weight:900;
+    color:var(--ink);
+    display:block;
+    margin-bottom:5px;
+  }
+
+  .s-item .desc{
+    font-size:12.5px;
+    line-height:1.7;
+    color:var(--gray-1);
+    display:block;
+  }
+
+  .note{
+    margin-top:20px;
+    position:relative;
+    background:rgba(0,47,167,.055);
+    border:2px dashed var(--klein);
+    border-radius:2px;
+    padding:16px 20px;
+    font-size:13.5px;
+    line-height:1.8;
+    color:#33333A;
+  }
+
+  .note strong{color:var(--klein);font-weight:900;}
+
+  /* ================= 4. 视频：拍立得 / 杂志封面容器 ================= */
+  .video-stack{display:block;}
+
+  .stage{
+    display:flex;
+    align-items:center;
+    gap:36px;
+    background:var(--paper);
+    border:3px solid var(--hard);
+    border-radius:2px;
+    padding:26px 28px;
+    margin:42px 0;
+    box-shadow:7px 7px 0 rgba(28,28,30,.13);
+    transition:transform .22s ease, box-shadow .22s ease;
+  }
+
+  .stage:hover{
+    transform:scale(1.012);
+    box-shadow:10px 11px 0 rgba(28,28,30,.17);
+  }
+
+  .stage:first-child{margin-top:24px;}
+  .stage:last-child{margin-bottom:8px;}
+
+  .stage--reverse{flex-direction:row-reverse;}
+
+  /* 第一行：克莱因蓝顶边；第二行：活力橙顶边 */
+  .stage--normal{border-top:7px solid var(--klein);}
+  .stage--reverse{border-top:7px solid var(--orange);}
+
+  /* 拍立得相框 */
+  .stage-media{
+    flex:0 0 300px;
+    width:300px;
+    background:#FFFDF8;
+    border:2.5px solid var(--hard);
+    border-radius:2px;
+    padding:13px 13px 42px;
+    box-shadow:5px 6px 0 rgba(28,28,30,.18);
+    position:relative;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+
+  .stage--normal .stage-media{transform:rotate(-2deg);}
+  .stage--reverse .stage-media{transform:rotate(2deg);}
+
+  .stage--normal .stage-media:hover{
+    transform:rotate(-2deg) scale(1.02);
+    box-shadow:7px 9px 0 rgba(28,28,30,.22);
+  }
+
+  .stage--reverse .stage-media:hover{
+    transform:rotate(2deg) scale(1.02);
+    box-shadow:7px 9px 0 rgba(28,28,30,.22);
+  }
+
+  .stage-media video{
+    display:block;
+    width:100%;
+    height:auto;
+    aspect-ratio:9 / 16;
+    object-fit:contain;
+    background:#14141A;
+    border:1px solid #B9B5AC;
+    border-radius:0;
+  }
+
+  /* 相框底部手写感签名 */
+  .stage-media::after{
+    content:"FIELD NOTE";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:11px;
+    text-align:center;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:3.4px;
+    color:var(--gray-2);
+  }
+
+  /* 阶段小标签：贴在相框角上 */
+  .stage-flag{
+    position:absolute;
+    top:-14px;
+    left:-10px;
+    z-index:3;
+    background:var(--klein);
+    color:#FFFFFF;
+    font-size:11.5px;
+    font-weight:900;
+    letter-spacing:1.6px;
+    border:2px solid var(--hard);
+    border-radius:2px;
+    padding:5px 11px;
+    white-space:nowrap;
+    box-shadow:3px 3px 0 rgba(28,28,30,.2);
+  }
+
+  .stage--reverse .stage-flag{
+    background:var(--orange);
+    left:auto;
+    right:-10px;
+  }
+
+  .stage-body{
+    flex:1 1 auto;
+    min-width:0;
+    align-self:center;
+    background:#FFFDF8;
+    border:2px solid var(--hard);
+    border-radius:2px;
+    padding:22px 26px;
+    box-shadow:4px 4px 0 rgba(28,28,30,.1);
+  }
+
+  .stage-head{
+    display:flex;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:10px;
+    padding-bottom:12px;
+    margin-bottom:15px;
+    border-bottom:2px solid var(--hard);
+  }
+
+  .stage-tag{
+    flex:0 0 auto;
+    background:var(--ink);
+    color:#FFFFFF;
+    font-size:11.5px;
+    font-weight:900;
+    letter-spacing:2px;
+    border-radius:2px;
+    padding:4px 11px;
+    white-space:nowrap;
+  }
+
+  .stage-title{
+    font-size:16px;
+    font-weight:900;
+    color:var(--ink);
+    letter-spacing:.3px;
+  }
+
+  .stage-desc{
+    margin:0;
+    font-size:13.5px;
+    line-height:1.88;
+    color:#3A3A41;
+    text-align:justify;
+  }
+
+  .stage-desc + .stage-desc{margin-top:11px;}
+
+  .stage-desc.tech{
+    padding-top:11px;
+    border-top:2px dotted #B9B5AC;
+    color:var(--gray-1);
+    font-size:13px;
+  }
+
+  .stage-desc.tech b{
+    color:var(--klein);
+    font-weight:900;
+  }
+
+  /* ================= 5. 工作流：拼贴风步骤条 ================= */
+  .flow{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    margin:22px 0 26px;
+  }
+
+  .flow .step{
+    position:relative;
+    background:#FFFDF8;
+    border:2.5px solid var(--hard);
+    border-radius:2px;
+    padding:11px 16px;
+    font-size:13px;
+    font-weight:900;
+    color:var(--ink);
+    white-space:nowrap;
+    box-shadow:4px 4px 0 rgba(28,28,30,.13);
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+
+  /* 拼贴：每个步骤错落角度交替 */
+  .flow .step:nth-child(4n+1){transform:rotate(-2deg);}
+  .flow .step:nth-child(4n+3){transform:rotate(2deg);}
+
+  .flow .step:hover{
+    transform:scale(1.02) rotate(0deg);
+    box-shadow:6px 6px 0 rgba(28,28,30,.19);
+  }
+
+  /* 步骤编号 */
+  .flow .step .n{
+    display:inline-block;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:11px;
+    font-weight:900;
+    color:#FFFFFF;
+    background:var(--klein);
+    border:2px solid var(--hard);
+    border-radius:50%;
+    width:19px;
+    height:19px;
+    line-height:16px;
+    text-align:center;
+    margin-right:8px;
+    vertical-align:1px;
+  }
+
+  .flow .step:nth-child(4n+5) .n{background:var(--orange);}
+  .flow .step:nth-child(4n+7) .n{background:var(--green);}
+  .flow .step:nth-child(4n+9) .n{background:var(--ink);}
+
+  .flow .arrow{
+    color:var(--hard);
+    font-size:15px;
+    font-weight:900;
+    line-height:1;
+  }
+
+  /* 主按钮：克莱因蓝粗边框块 */
+  .btn{
+    display:inline-block;
+    background:var(--klein);
+    color:#FFFFFF;
+    font-size:15px;
+    font-weight:900;
+    letter-spacing:.6px;
+    padding:15px 34px;
+    border-radius:2px;
+    text-decoration:none;
+    border:2.5px solid var(--hard);
+    box-shadow:6px 6px 0 var(--orange);
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+
+  .btn:hover{
+    background:var(--klein-dark);
+    transform:scale(1.02);
+    box-shadow:8px 9px 0 var(--orange);
+  }
+
+  /* ================= 6. 感悟：彩色标签卡片 ================= */
+  .pains{
+    display:grid;
+    gap:16px;
+  }
+
+  .pain{
+    position:relative;
+    display:grid;
+    grid-template-columns:44px 1fr;
+    gap:16px;
+    align-items:start;
+    background:#FFFDF8;
+    border:2.5px solid var(--hard);
+    border-radius:2px;
+    padding:18px 22px;
+    box-shadow:5px 5px 0 rgba(28,28,30,.12);
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+
+  .pain:hover{
+    transform:scale(1.02);
+    box-shadow:7px 8px 0 rgba(28,28,30,.17);
+  }
+
+  /* 三类颜色标签：左色条 + 编号底色 */
+  .pain.p-api{border-left:9px solid var(--orange);}
+  .pain.p-tts{border-left:9px solid var(--klein);}
+  .pain.p-fix{border-left:9px solid var(--green);}
+
+  .pain .idx{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:15px;
+    font-weight:900;
+    color:#FFFFFF;
+    text-align:center;
+    line-height:30px;
+    width:30px;
+    height:30px;
+    border:2px solid var(--hard);
+    border-radius:2px;
+    background:var(--orange);
+  }
+
+  .pain.p-tts .idx{background:var(--klein);}
+  .pain.p-fix .idx{background:var(--green);}
+
+  .pain .txt{
+    font-size:14px;
+    line-height:1.85;
+    color:#33333A;
+    text-align:justify;
+    margin:0;
+  }
+
+  .pain .txt b{color:var(--ink);font-weight:900;}
+
+  /* 分类小标签 */
+  .pain .chip{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:900;
+    letter-spacing:1.6px;
+    color:#FFFFFF;
+    background:var(--orange);
+    border:2px solid var(--hard);
+    border-radius:2px;
+    padding:2px 9px;
+    margin-bottom:7px;
+  }
+
+  .pain.p-tts .chip{background:var(--klein);}
+  .pain.p-fix .chip{background:var(--green);}
+
+  /* ================= 7. 页脚 ================= */
+  .footer{
+    margin-top:38px;
+    padding-top:24px;
+    border-top:3px solid var(--hard);
+    text-align:center;
+    font-size:13px;
+    color:var(--gray-1);
+    line-height:2;
+    letter-spacing:.6px;
+  }
+
+  .footer b{
+    color:var(--ink);
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:1.6px;
+  }
+
+  /* ================= 响应式 ================= */
+  @media (max-width:900px){
+    .cover h1{font-size:44px;}
+    .nav-links a{padding:7px 9px;font-size:12.5px;}
+  }
+
+  @media (max-width:820px){
+    body{padding:0 16px 48px;}
+    .nav{margin:0 -16px;padding:0 16px;}
+    .nav-inner{height:auto;min-height:56px;flex-wrap:wrap;padding:8px 0;gap:6px;}
+    .nav-links{gap:2px;flex-wrap:wrap;}
+    .nav-links a{font-size:12px;padding:5px 8px;}
+    .card{padding:24px 20px 26px;box-shadow:6px 6px 0 rgba(28,28,30,.13);}
+    .tilt-l,.tilt-r{transform:none;}
+    .cover{padding:40px 24px 36px;box-shadow:7px 7px 0 rgba(28,28,30,.14);}
+    .cover h1{font-size:34px;letter-spacing:-.5px;}
+    .cover .sub{font-size:15px;}
+    .cover::after{width:150px;height:150px;right:-58px;top:-58px;}
+    .grid-s{grid-template-columns:repeat(2,1fr);}
+    .s-item:nth-child(odd),.s-item:nth-child(even){transform:none;}
+    .lead-quote{padding-left:60px;}
+    .lead-quote::before{font-size:80px;top:-8px;}
+    .stage{
+      flex-direction:column;
+      gap:24px;
+      padding:22px 18px;
+      margin:30px 0;
+    }
+    .stage--normal .stage-media,
+    .stage--reverse .stage-media{transform:none;}
+    .stage-media{flex:0 0 auto;width:100%;max-width:320px;margin:0 auto;}
+    .stage-flag{left:0;right:auto;}
+    .stage--reverse .stage-flag{left:0;right:auto;}
+    .flow .step:nth-child(4n+1),
+    .flow .step:nth-child(4n+3){transform:none;}
+  }
+
+  @media (max-width:480px){
+    .cover h1{font-size:28px;}
+    .card-head h2{font-size:19px;}
+    .grid-s{grid-template-columns:1fr;}
+    .flow{gap:7px;}
+    .flow .step{font-size:12px;padding:9px 12px;}
+    .btn{display:block;text-align:center;padding:14px 18px;}
+    .pain{grid-template-columns:34px 1fr;gap:12px;padding:16px;}
+    .lead-quote{padding-left:0;padding-top:56px;}
+    .lead-quote::before{left:0;top:-6px;font-size:74px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部吸顶导航 ================= -->
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="nav-brand"><span class="dot"></span>王欣彤</span>
+    <div class="nav-links">
+      <a href="#sec-topic">选题背景</a>
+      <a href="#sec-plan">策划文案</a>
+      <a href="#sec-work">作品展示</a>
+      <a href="#sec-skill">技能封装</a>
+      <a href="#sec-learn">开发感悟</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============ 1. 封面区 ============ -->
+  <header class="cover">
+    <span class="eyebrow">NEW MEDIA INTERACTION DESIGN</span>
+    <h1>名著讲解视频自动生成技能</h1>
+    <div class="rule"></div>
+    <p class="sub">利用 AI 大模型实现从剧本、配图、配音到视频合成的全流程自动化</p>
+    <div class="meta">
+      <span>学号：<b>2025106081</b></span>
+      <span>姓名：<b>王欣彤</b></span>
+    </div>
+  </header>
+
+  <!-- ============ 2. 选题区 ============ -->
+  <section class="card tilt-l" id="sec-topic">
+    <div class="card-head">
+      <span class="num">2</span>
+      <h2>选题背景与专业契合度</h2>
+    </div>
+
+    <div class="lead-quote">
+      <p>作为网络与新媒体专业（智能传播方向）的学生，选择《娱乐至死》与《乌合之众》作为测试书目，是因为这两本书是理解媒介生态与群体心理的奠基之作。用它们来验证自动生成技能，能精准测试系统对“媒介隐喻”“信息娱乐化”“群体无意识”等抽象传播学概念的视觉化呈现能力。</p>
+    </div>
+
+    <div class="blocks" style="margin-top:22px;">
+      <div class="block accent-k">
+        <span class="b-title">书目选择</span>
+        <p class="b-text">《娱乐至死》与《乌合之众》—— 理解媒介生态与群体心理的奠基之作。</p>
+      </div>
+      <div class="block accent-o">
+        <span class="b-title">专业契合</span>
+        <p class="b-text">网络与新媒体专业（智能传播方向）的核心关切，正是媒介如何塑造认知与群体行为。</p>
+      </div>
+      <div class="block accent-g">
+        <span class="b-title">验证目标</span>
+        <p class="b-text">精准测试系统对“媒介隐喻”“信息娱乐化”“群体无意识”等抽象传播学概念的视觉化呈现能力。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 策划与文案区 ============ -->
+  <section class="card tilt-r" id="sec-plan">
+    <div class="card-head">
+      <span class="num">3</span>
+      <h2>策划与文案设计</h2>
+    </div>
+    <p>本技能采用标准化“s0–s6”脚本结构：s0 引子吸引注意，s1–s2 书名报幕与作者背景，s3–s5 核心论点铺陈，s6 寄语收束。</p>
+
+    <div class="grid-s">
+      <div class="s-item">
+        <span class="tag">s0</span>
+        <span class="role">引子</span>
+        <span class="desc">抛出悬念与时代痛点，第一时间吸引注意。</span>
+      </div>
+      <div class="s-item">
+        <span class="tag">s1–s2</span>
+        <span class="role">报幕与背景</span>
+        <span class="desc">书名报幕，交代作者生平与写作语境。</span>
+      </div>
+      <div class="s-item">
+        <span class="tag">s3–s5</span>
+        <span class="role">核心论证</span>
+        <span class="desc">分层铺陈全书核心论点与关键概念。</span>
+      </div>
+      <div class="s-item">
+        <span class="tag">s6</span>
+        <span class="role">寄语收束</span>
+        <span class="desc">回扣现实，以寄语收尾完成情绪落点。</span>
+      </div>
+    </div>
+
+    <div class="note">
+      画面描述采用<strong>“现代新闻纪录片风格”</strong>，结合高对比度、霓虹灯、冷色调等视觉元素，使抽象论点获得统一且可辨识的视觉表达。
+    </div>
+  </section>
+
+  <!-- ============ 4. 视频展示区 ============ -->
+  <section class="card" id="sec-work">
+    <div class="card-head">
+      <span class="num">4</span>
+      <h2>作品展示与流程验证</h2>
+    </div>
+    <p>本技能采用“先跑通流程，再复用测试”的开发方法。首先以《娱乐至死》为例跑通全流程，随后将该技能直接复用于《乌合之众》，验证技能的通用性与稳定性。</p>
+
+    <div class="video-stack">
+
+      <!-- 第一行：视频在左，文字在右 -->
+      <div class="stage stage--normal">
+        <div class="stage-media">
+          <span class="stage-flag">STAGE 01 · 跑通流程</span>
+          <video controls preload="metadata" playsinline>
+            <source src="mp4/《娱乐至死》讲解视频.mp4" type="video/mp4">
+            您的浏览器不支持 HTML5 视频播放，请升级浏览器后重试。
+          </video>
+        </div>
+        <div class="stage-body">
+          <div class="stage-head">
+            <span class="stage-tag">第一阶段</span>
+            <span class="stage-title">流程开发与跑通 —— 以《娱乐至死》为例，跑通全流程</span>
+          </div>
+          <p class="stage-desc">通过本书测试了从剧本生成、ARK 生图、豆包 TTS 2.0 配音到视频合成的完整链路，解决了各种 API 兼容和画面倒放问题。</p>
+          <p class="stage-desc tech"><b>技术路线：</b>本阶段为踩坑与修正期，逐一攻克密钥权限、TTS 版本兼容、转场效果三类问题，把全链路首次打通。</p>
+        </div>
+      </div>
+
+      <!-- 第二行：反向排列，文字在左，视频在右 -->
+      <div class="stage stage--reverse">
+        <div class="stage-media">
+          <span class="stage-flag">STAGE 02 · 复用验证</span>
+          <video controls preload="metadata" playsinline>
+            <source src="mp4/《乌合之众》讲解视频.mp4" type="video/mp4">
+            您的浏览器不支持 HTML5 视频播放，请升级浏览器后重试。
+          </video>
+        </div>
+        <div class="stage-body">
+          <div class="stage-head">
+            <span class="stage-tag">第二阶段</span>
+            <span class="stage-title">技能复用与验证 —— 输入《乌合之众》，验证技能复用能力</span>
+          </div>
+          <p class="stage-desc">在技能封装完成后，直接输入新书名，系统自动生成全套素材并合成视频，验证了技能无需人工干预即可复用。</p>
+          <p class="stage-desc tech"><b>技术路线：</b>本阶段为无缝复用期，沿用第一阶段固化的技能流程，仅替换书名输入即可产出成片，无需再次调试。</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 5. 技能展示区 ============ -->
+  <section class="card tilt-l" id="sec-skill">
+    <div class="card-head">
+      <span class="num">5</span>
+      <h2>技能封装与工作流</h2>
+    </div>
+    <p>全流程已封装为可复用的 Skill，输入书名后自动完成：</p>
+
+    <div class="flow">
+      <span class="step"><span class="n">1</span>剧本生成</span><span class="arrow">→</span>
+      <span class="step"><span class="n">2</span>ARK 生图</span><span class="arrow">→</span>
+      <span class="step"><span class="n">3</span>豆包 TTS 2.0 配音</span><span class="arrow">→</span>
+      <span class="step"><span class="n">4</span>Seedance 生成动态视频</span><span class="arrow">→</span>
+      <span class="step"><span class="n">5</span>FFmpeg 合成字幕与推近效果</span>
+    </div>
+
+    <a class="btn" href="skill.md" target="_blank">点击查看完整技能文档 (skill.md)</a>
+  </section>
+
+  <!-- ============ 6. 开发感悟区 ============ -->
+  <section class="card tilt-r" id="sec-learn">
+    <div class="card-head">
+      <span class="num">6</span>
+      <h2>踩坑与开发感悟</h2>
+    </div>
+    <div class="pains">
+      <div class="pain p-api">
+        <span class="idx">01</span>
+        <div>
+          <span class="chip">API 兼容</span>
+          <p class="txt">解决了不同 API 需要独立密钥的<b>权限问题</b>。图片生成与语音合成分属不同控制台、不同凭据体系，必须分别申请与配置，不能混用。</p>
+        </div>
+      </div>
+      <div class="pain p-tts">
+        <span class="idx">02</span>
+        <div>
+          <span class="chip">TTS 双向流</span>
+          <p class="txt">解决了豆包 TTS <b>1.0 与 2.0 版本兼容问题</b>。账户实际开通的是 2.0 资源，音色与资源 ID 必须严格匹配，最终使用 <b>WebSocket 双向流协议</b>跑通音频生成。</p>
+        </div>
+      </div>
+      <div class="pain p-fix">
+        <span class="idx">03</span>
+        <div>
+          <span class="chip">画面倒放修复</span>
+          <p class="txt">修复了<b>“乒乓倒放”（正放–倒放）造成的画面诡异问题</b>，改用 <b>Ken Burns 缓慢推近效果</b>，使静态画面获得平稳、自然的运动感。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. 页脚 ============ -->
+  <footer class="footer">
+    <b>西北大学新闻传播学院</b><br>
+    新媒体交互设计课程作业
+  </footer>
+
+</div>
+</body>
+</html>
